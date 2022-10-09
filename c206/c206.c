@@ -79,7 +79,9 @@ void DLL_Error() {
  * @param list Ukazatel na strukturu dvousměrně vázaného seznamu
  */
 void DLL_Init( DLList *list ) {
-	solved = FALSE; /* V případě řešení, smažte tento řádek! */
+	list->activeElement = NULL;
+	list->firstElement = NULL;
+	list->lastElement = NULL;
 }
 
 /**
@@ -90,7 +92,18 @@ void DLL_Init( DLList *list ) {
  * @param list Ukazatel na inicializovanou strukturu dvousměrně vázaného seznamu
  */
 void DLL_Dispose( DLList *list ) {
-	solved = FALSE; /* V případě řešení, smažte tento řádek! */
+	
+	if(list->firstElement != NULL) {				// Check if list isn't already empty
+		DLLElementPtr elem = list->firstElement;	// Set a pointer to the first list elem
+		while(elem != NULL) {						// Loop through the list and free all elements
+			DLLElementPtr next = elem->nextElement;
+			free(elem);
+			elem = next;
+		}
+		list->activeElement = NULL;					// Set list into default post-initialization state
+		list->firstElement = NULL;
+		list->lastElement = NULL;
+	}
 }
 
 /**
@@ -102,6 +115,17 @@ void DLL_Dispose( DLList *list ) {
  * @param data Hodnota k vložení na začátek seznamu
  */
 void DLL_InsertFirst( DLList *list, int data ) {
+
+	DLLElementPtr newElem = malloc(sizeof(struct DLLElement));
+	if(newElem == NULL) {
+		DLL_Error();
+		return;
+	}
+
+
+
+
+
 	solved = FALSE; /* V případě řešení, smažte tento řádek! */
 }
 
