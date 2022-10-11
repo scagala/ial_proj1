@@ -121,12 +121,21 @@ void DLL_InsertFirst( DLList *list, int data ) {
 		DLL_Error();
 		return;
 	}
+	
+	newElem->data = data;									// set the value of newElem
+	newElem->nextElement = list->firstElement;				// nextElem will be the original first element
+	newElem->previousElement = NULL;						// previousElem of the new head will be empty
 
+	if(list->firstElement != NULL) { 						
+		// list is not empty
+		list->firstElement->previousElement = newElem;		// list isn't empty, so the prevElem pointer of the original first element will point to the new element
+		list->firstElement = newElem;						// newElem becomes the new first element of the list
+	}
+	else {
+		list->firstElement = newElem;
+		list->lastElement = newElem;						// list was empty, so newElem becomes both the first and last element of the list
+	}
 
-
-
-
-	solved = FALSE; /* V případě řešení, smažte tento řádek! */
 }
 
 /**
@@ -138,7 +147,27 @@ void DLL_InsertFirst( DLList *list, int data ) {
  * @param data Hodnota k vložení na konec seznamu
  */
 void DLL_InsertLast( DLList *list, int data ) {
-	solved = FALSE; /* V případě řešení, smažte tento řádek! */
+	
+	DLLElementPtr newElem = malloc(sizeof(struct DLLElement));
+	if(newElem == NULL) {
+		DLL_Error();
+		return;
+	}
+
+	newElem->data = data;									// set value of newElem
+	newElem->nextElement = NULL;							// newElem will be the last element of the list, thus nextElem pointer will be empty
+	newElem->previousElement = list->lastElement;			// Original last elem of the list will come before the new last element
+
+	if(list->firstElement != NULL) {
+		// list is not empty
+		list->lastElement->nextElement = newElem;			// list is not empty, so nextElem ptr of the original last element will point to the new last elem
+		list->lastElement = newElem;						// newElem becomes the new last element of the list
+	}
+	else {
+		list->firstElement = newElem;
+		list->lastElement = newElem; 						// list was empty, so newElem becomes both the first and last element
+	}
+	
 }
 
 /**
@@ -149,7 +178,7 @@ void DLL_InsertLast( DLList *list, int data ) {
  * @param list Ukazatel na inicializovanou strukturu dvousměrně vázaného seznamu
  */
 void DLL_First( DLList *list ) {
-	solved = FALSE; /* V případě řešení, smažte tento řádek! */
+	list->activeElement = list->firstElement;
 }
 
 /**
@@ -160,7 +189,7 @@ void DLL_First( DLList *list ) {
  * @param list Ukazatel na inicializovanou strukturu dvousměrně vázaného seznamu
  */
 void DLL_Last( DLList *list ) {
-	solved = FALSE; /* V případě řešení, smažte tento řádek! */
+	list->activeElement = list->lastElement;
 }
 
 /**
@@ -171,7 +200,15 @@ void DLL_Last( DLList *list ) {
  * @param dataPtr Ukazatel na cílovou proměnnou
  */
 void DLL_GetFirst( DLList *list, int *dataPtr ) {
-	solved = FALSE; /* V případě řešení, smažte tento řádek! */
+	
+	if(list->firstElement == NULL) {
+		//list is empty
+		DLL_Error();
+		return;
+	}
+	// list is not empty
+	// set dataPtr to the value of firstElement
+	*dataPtr = list->firstElement->data;
 }
 
 /**
@@ -182,7 +219,15 @@ void DLL_GetFirst( DLList *list, int *dataPtr ) {
  * @param dataPtr Ukazatel na cílovou proměnnou
  */
 void DLL_GetLast( DLList *list, int *dataPtr ) {
-	solved = FALSE; /* V případě řešení, smažte tento řádek! */
+
+	if(list->firstElement == NULL) {
+		// list is empty
+		DLL_Error();
+		return;
+	}
+	// list is not empty
+	// set dataPtr to the value of lastElement
+	*dataPtr = list->lastElement->data;
 }
 
 /**
@@ -193,7 +238,27 @@ void DLL_GetLast( DLList *list, int *dataPtr ) {
  * @param list Ukazatel na inicializovanou strukturu dvousměrně vázaného seznamu
  */
 void DLL_DeleteFirst( DLList *list ) {
-	solved = FALSE; /* V případě řešení, smažte tento řádek! */
+	
+	if(list->firstElement != NULL) { 									// list cannot be empty 
+
+		if(list->firstElement == list->activeElement) {					// firstElement was active
+			list->activeElement = NULL;									// cancel the active elem
+		}
+
+		DLLElementPtr first = list->firstElement;
+
+		if(list->firstElement == list->lastElement) {					// there is only one element in the list
+			list->firstElement = NULL;
+			list->lastElement = NULL;									// we removed the only elem in the list, list is now empty
+		}
+		else {
+			list->firstElement->nextElement->previousElement = NULL;	// remove the pointer to the previous element of the current second elem, since it will become the new first element
+			list->firstElement = list->firstElement->nextElement;		// original second element becomes the first element; eliminating the original first
+		}
+
+		free(first);													// free the original first elem from memory
+	}
+
 }
 
 /**
@@ -204,7 +269,27 @@ void DLL_DeleteFirst( DLList *list ) {
  * @param list Ukazatel na inicializovanou strukturu dvousměrně vázaného seznamu
  */
 void DLL_DeleteLast( DLList *list ) {
-	solved = FALSE; /* V případě řešení, smažte tento řádek! */
+	
+	if(list->firstElement != NULL) {									// list cannot be empty
+
+		if(list->lastElement == list->activeElement) {
+			list->activeElement = NULL;									// cancel the active element if lastElem was active
+		}
+
+		DLLElementPtr last = list->lastElement;
+
+		if(list->firstElement == list->lastElement) {					// there is only one element in the list
+			list->firstElement = NULL;
+			list->lastElement = NULL;									// we removed the only elem in the list, list is now empty
+		}
+		else {
+			list->lastElement->previousElement->nextElement = NULL;		// remove the pointer to next elem of the second-to-last element, since it will become the new last element
+			list->lastElement = list->lastElement->previousElement;		// original second-to-last element becomes the new last element; eliminating the previous last
+		}
+		free(last);														// free the original last elem from memory
+	}
+
+
 }
 
 /**
@@ -263,7 +348,13 @@ void DLL_InsertBefore( DLList *list, int data ) {
  * @param dataPtr Ukazatel na cílovou proměnnou
  */
 void DLL_GetValue( DLList *list, int *dataPtr ) {
-	solved = FALSE; /* V případě řešení, smažte tento řádek! */
+	
+	if(list->activeElement == NULL) {					// check whether list is active
+		DLL_Error();
+		return;
+	}
+	*dataPtr = list->activeElement->data;				// set dataPtr to the value of the active element
+
 }
 
 /**
@@ -274,7 +365,10 @@ void DLL_GetValue( DLList *list, int *dataPtr ) {
  * @param data Nová hodnota právě aktivního prvku
  */
 void DLL_SetValue( DLList *list, int data ) {
-	solved = FALSE; /* V případě řešení, smažte tento řádek! */
+	
+	if(list->activeElement != NULL) {							// do nothing if list is inactive
+		list->activeElement->data = data;						// set the active elem's value to 'data'
+	}
 }
 
 /**
@@ -285,7 +379,13 @@ void DLL_SetValue( DLList *list, int data ) {
  * @param list Ukazatel na inicializovanou strukturu dvousměrně vázaného seznamu
  */
 void DLL_Next( DLList *list ) {
-	solved = FALSE; /* V případě řešení, smažte tento řádek! */
+	
+	if(list->activeElement != NULL) {								// Do nothing if list is inactive
+		if(list->activeElement == list->lastElement) {
+			list->activeElement = NULL;								// if last elem was the active one, list becomes inactive
+		}
+		list->activeElement = list->activeElement->nextElement;		// next element becomes active
+	}
 }
 
 
@@ -297,7 +397,16 @@ void DLL_Next( DLList *list ) {
  * @param list Ukazatel na inicializovanou strukturu dvousměrně vázaného seznamu
  */
 void DLL_Previous( DLList *list ) {
-	solved = FALSE; /* V případě řešení, smažte tento řádek! */
+
+	if(list->activeElement != NULL) {								//DO nothing if list is inactive
+		if(list->activeElement == list->firstElement) {				
+			list->activeElement = NULL;								// if first elem was the active one, list becomes inactive
+		}
+		list->activeElement = list->activeElement->previousElement;	// previous element becomes active
+	}
+
+
+
 }
 
 /**
@@ -309,8 +418,7 @@ void DLL_Previous( DLList *list ) {
  * @returns Nenulovou hodnotu v případě aktivity prvku seznamu, jinak nulu
  */
 int DLL_IsActive( DLList *list ) {
-	solved = FALSE; /* V případě řešení, smažte tento řádek! */
-	return 0;
+	return(list->activeElement != NULL);
 }
 
 /* Konec c206.c */
