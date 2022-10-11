@@ -300,7 +300,23 @@ void DLL_DeleteLast( DLList *list ) {
  * @param list Ukazatel na inicializovanou strukturu dvousměrně vázaného seznamu
  */
 void DLL_DeleteAfter( DLList *list ) {
-	solved = FALSE; /* V případě řešení, smažte tento řádek! */
+	
+	if(list->activeElement != NULL && list->lastElement != list->activeElement) {					// continue only if the list is active and the active element is not the last elem of the list
+
+		DLLElementPtr tmp_elem = list->activeElement->nextElement;
+																									 
+		if(tmp_elem == list->lastElement) {															// the next elem is the last one
+			list->activeElement->nextElement = NULL;												// active elem becomes last, thus we can remove the next element
+			list->lastElement = list->activeElement;
+		}
+		else {																						// next elem is not last in the list
+			list->activeElement->nextElement = tmp_elem->nextElement;								// the active element will point to the element after the one we want to delete
+			tmp_elem->nextElement->previousElement = list->activeElement;							// the elem before the element we want to delete will point to the current active element
+		}
+		free(tmp_elem);
+
+	}
+
 }
 
 /**
@@ -311,7 +327,21 @@ void DLL_DeleteAfter( DLList *list ) {
  * @param list Ukazatel na inicializovanou strukturu dvousměrně vázaného seznamu
  */
 void DLL_DeleteBefore( DLList *list ) {
-	solved = FALSE; /* V případě řešení, smažte tento řádek! */
+	
+	if(list->activeElement != NULL && list->firstElement != list->activeElement) {					// continue only if the list is active and the active element is not the first elem of the list
+
+		DLLElementPtr tmp_elem = list->activeElement->previousElement;
+
+		if(tmp_elem == list->firstElement) {														// the elem we want to delete is the first elem of the list
+			list->activeElement->previousElement = NULL;											// active elem first last, thus we can remove the previous element
+			list->firstElement = list->activeElement;
+		}
+		else {																						// previous elem is not first in the list
+			list->activeElement->previousElement = tmp_elem->previousElement;						// the active element will point to the element before the one we want to delete
+			tmp_elem->previousElement->nextElement = list->activeElement;							// the elem after the element we want to delete will point to the current active element
+		}
+		free(tmp_elem);
+	}
 }
 
 /**
