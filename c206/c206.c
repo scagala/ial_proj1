@@ -93,16 +93,13 @@ void DLL_Init( DLList *list ) {
  */
 void DLL_Dispose( DLList *list ) {
 	
-	if(list->firstElement != NULL) {				// Check if list isn't already empty
-		DLLElementPtr elem = list->firstElement;	// Set a pointer to the first list elem
-		while(elem != NULL) {						// Loop through the list and free all elements
-			DLLElementPtr next = elem->nextElement;
-			free(elem);
-			elem = next;
-		}
-		list->activeElement = NULL;					// Set list into default post-initialization state
-		list->firstElement = NULL;
-		list->lastElement = NULL;
+	list->firstElement = NULL;
+	list->activeElement = NULL;
+
+	while(list->lastElement != NULL) {
+		DLLElementPtr last = list->lastElement;
+		list->lastElement = list->lastElement->previousElement;
+		free(last);
 	}
 }
 
@@ -354,7 +351,30 @@ void DLL_DeleteBefore( DLList *list ) {
  * @param data Hodnota k vložení do seznamu za právě aktivní prvek
  */
 void DLL_InsertAfter( DLList *list, int data ) {
-	solved = FALSE; /* V případě řešení, smažte tento řádek! */
+	
+	if(list->activeElement != NULL) {											//list has to be active
+
+		DLLElementPtr newElem = malloc(sizeof(struct DLLElement));
+		if (newElem == NULL) {
+			DLL_Error();
+			return;
+		}
+		
+		newElem->data = data;													// assign value to new element
+		newElem->previousElement = list->activeElement;							// newElem will come after the active element, so nE.previous will point to the current active element
+
+		if(list->activeElement == list->lastElement) {							// if the last elem of the list is the last one, newElem will become the new last element
+			newElem->nextElement = NULL;
+			list->lastElement = newElem;
+		}
+		else {
+			list->activeElement->nextElement->previousElement = newElem;		// 
+			newElem->nextElement = list->activeElement->nextElement;			// 
+		}
+		list->activeElement->nextElement = newElem;								// active elem will point the newElem as the next element
+
+
+	}
 }
 
 /**
@@ -367,7 +387,28 @@ void DLL_InsertAfter( DLList *list, int data ) {
  * @param data Hodnota k vložení do seznamu před právě aktivní prvek
  */
 void DLL_InsertBefore( DLList *list, int data ) {
-	solved = FALSE; /* V případě řešení, smažte tento řádek! */
+	
+	if(list->activeElement != NULL) {
+		
+		DLLElementPtr newElem = malloc(sizeof(struct DLLElement));
+		if (newElem == NULL) {
+			DLL_Error();
+			return;
+		}
+
+		newElem->data = data;
+		newElem->nextElement = list->activeElement;
+
+		if(list->activeElement == list->firstElement) {
+			newElem->previousElement = NULL;
+			list->firstElement = newElem;
+		}
+		else {
+			list->activeElement->previousElement->nextElement = newElem;
+			newElem->previousElement = list->activeElement->previousElement;
+		}
+		list->activeElement->previousElement = newElem;
+	}
 }
 
 /**
@@ -411,9 +452,9 @@ void DLL_SetValue( DLList *list, int data ) {
 void DLL_Next( DLList *list ) {
 	
 	if(list->activeElement != NULL) {								// Do nothing if list is inactive
-		if(list->activeElement == list->lastElement) {
-			list->activeElement = NULL;								// if last elem was the active one, list becomes inactive
-		}
+		// if(list->activeElement == list->lastElement) {
+		// 	list->activeElement = NULL;								// if last elem was the active one, list becomes inactive
+		// }
 		list->activeElement = list->activeElement->nextElement;		// next element becomes active
 	}
 }
@@ -429,9 +470,9 @@ void DLL_Next( DLList *list ) {
 void DLL_Previous( DLList *list ) {
 
 	if(list->activeElement != NULL) {								//DO nothing if list is inactive
-		if(list->activeElement == list->firstElement) {				
-			list->activeElement = NULL;								// if first elem was the active one, list becomes inactive
-		}
+		// if(list->activeElement == list->firstElement) {				
+		// 	list->activeElement = NULL;								// if first elem was the active one, list becomes inactive
+		// }
 		list->activeElement = list->activeElement->previousElement;	// previous element becomes active
 	}
 
